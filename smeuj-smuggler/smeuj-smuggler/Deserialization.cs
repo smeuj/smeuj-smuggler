@@ -10,6 +10,13 @@ namespace SmeujSmuggler {
 
     internal static class Deserialization {
 
+        public static ClientConfig? ReadConfig(string file_path) {
+            using (var reader = new StreamReader(file_path))
+                return JsonConvert.DeserializeObject<ClientConfig>(
+                    reader.ReadToEnd()
+                );
+        }
+
         public static IEnumerable<Smeu> ReadSmeuj(string file_path) {
             List<JsonObject>? smeuj = null;
             using (var reader = new StreamReader(file_path))
