@@ -18,24 +18,28 @@ namespace SmeujSmuggler {
         }
 
         public static IEnumerable<Smeu> ReadSmeuj(string file_path) {
-            List<JsonObject>? smeuj = null;
+            List<SmeuEntry>? entries = null;
             using (var reader = new StreamReader(file_path))
-                smeuj = JsonConvert.DeserializeObject<List<JsonObject>>(
+                entries = JsonConvert.DeserializeObject<List<SmeuEntry>>(
                     reader.ReadToEnd()
                 );
-            if (smeuj is null)
+            if (entries is null)
                 yield break;
-            foreach (JsonObject smeu in smeuj)
-                yield return SmeuFromJson(smeu);
+            foreach (var entry in entries)
+                yield return SmeuFromJson(entry);
         }
 
-        private static Smeu SmeuFromJson(JsonObject source)
+        private static Smeu SmeuFromJson(SmeuEntry entry)
             => new Smeu(
-                source["author"]!,
-                source["inspiration"],
-                ParseDateTime(source["date"]!, source["time"]!),
-                source["content"]!,
-                source["example"]
+                entry.Author,
+                entry.Inspirations,
+                ParseDateTime(entry.Date, entry.Time),
+                entry.Content,
+                entry.Examples.Select(example => new Example(
+                    example.Author,
+                    ParseDateTime(example.Date, example.Time),
+                    example.Content
+                )).ToList()
             );
 
         private static DateTime ParseDateTime(string date, string time) {
@@ -50,6 +54,22 @@ namespace SmeujSmuggler {
                 0
             );
         }
+
+        private record SmeuEntry(
+            string Author,
+            List<string> Inspirations,
+            string Date,
+            string Time,
+            string Content,
+            List<ExampleEntry> Examples
+        );
+
+        private record ExampleEntry(
+            string Content,
+            string Author,
+            string Date,
+            string Time
+        );
 
     }
 

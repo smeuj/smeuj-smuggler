@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Discord;
@@ -56,16 +57,18 @@ namespace SmeujSmuggler {
         }
 
         private string MakeSmeuMessage(Smeu smeu)
-            => $"_{smeu.Content}_\nGenoemd door **{smeu.Author}** op "
-            +  $"{smeu.Time.ToString("g")}"
+            => $"**{smeu.Content}**\nGenoemd door {smeu.Author} op "
+            +  smeu.Time.ToString("g")
             + (
-                smeu.Inspiration is not null
-                ? $"\nGeïnspireerd door {smeu.Inspiration}"
+                smeu.Inspirations.Count > 0
+                ? $"\nGeïnspireerd door {smeu.Inspirations.Aggregate((x, y) => $"{x}, {y}")}"
                 : string.Empty
             )
             + (
-                smeu.Example is not null
-                ? $"\n\"{smeu.Example}\""
+                smeu.Examples.Count > 0
+                ? smeu.Examples
+                    .Select(example => $"\n\"{example.Content}\" ({example.Author}, {example.Time.ToString("g")})")
+                    .Aggregate((x, y) => x + y)
                 : string.Empty
             );
     }
